@@ -29,10 +29,20 @@ def szyfrowanie (x, y, k0, k1):
         x, y = runda_speck(x, y, k1)
         k0, k1 = runda_klucza(k0, k1, i)
         
-    return x, y 
+    return x, y
 
-plaintext = [x, y] = [ 0x6c61766975716520, 0x7469206564616d20]
-key = [k0, k1] = [ 0x0f0e0d0c0b0a0908, 0x0706050403020100]
+def siatkowanie_słów(hex_string):
+    assert len(hex_string) == 32
+    słowo1 = int(hex_string[:16], 16)
+    słowo2 = int(hex_string[16:], 16)
+    return słowo1, słowo2
+
+plaintext = "6c617669757165207469206564616d20"
+key = "0f0e0d0c0b0a09080706050403020100"
+
+x, y = siatkowanie_słów(plaintext)
+k0, k1= siatkowanie_słów(key)
+
 
 szyfr = szyfrowanie(x, y, k0, k1)
 print(f"szyfr: {szyfr[0]:016x}, {szyfr[1]:016x}")
