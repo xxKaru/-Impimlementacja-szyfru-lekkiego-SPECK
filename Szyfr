@@ -1,0 +1,38 @@
+def obrocwprawo (x, n):
+    obrocona = (x >> n) | ((x  << (64 - n)) & 0xFFFFFFFFFFFFFFFF )
+    return obrocona
+
+def obrocwlewo (y, n):
+    obrocona1 = (y << n) & 0xFFFFFFFFFFFFFFFF | ((y  >> (64 - n)) )
+    return obrocona1
+
+def runda_speck (x, y, k1):
+    x = obrocwprawo (x, 8)
+    x = (x+y) & 0xFFFFFFFFFFFFFFFF
+    x ^=k1
+    y = obrocwlewo (y, 3)
+    y ^=x
+    return x, y
+
+def runda_klucza (k0, k1, i):
+    
+    k0 = obrocwprawo (k0, 8)
+    k0 = (k0 + k1) & 0xFFFFFFFFFFFFFFFF
+    k0 ^=i
+    k1 = obrocwlewo (k1, 3)
+    k1 ^=k0
+    return k0, k1
+
+def szyfrowanie (x, y, k0, k1):
+
+    for i in range(32):
+        x, y = runda_speck(x, y, k1)
+        k0, k1 = runda_klucza(k0, k1, i)
+        
+    return x, y 
+
+plaintext = [x, y] = [ 0x6c61766975716520, 0x7469206564616d20]
+key = [k0, k1] = [ 0x0f0e0d0c0b0a0908, 0x0706050403020100]
+
+szyfr = szyfrowanie(x, y, k0, k1)
+print(f"szyfr: {szyfr[0]:016x}, {szyfr[1]:016x}")
