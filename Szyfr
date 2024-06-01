@@ -42,13 +42,15 @@ def padding(plaintext):
         plaintext += '0'
     return plaintext
 
+def ascii_to_hex(text_ascii):
+    plaintext = text_ascii.encode('utf-8').hex()
+    return padding(plaintext)
 
 
-
-plaintext = "6c617669757165207469206564616d2"
+plaintext = "cokolwiek"  
 key = "0f0e0d0c0b0a09080706050403020100"
 
-print (plaintext)
+plaintext = ascii_to_hex(plaintext)
 
 x, y = siatkowanie_słów(plaintext)
 k0, k1= siatkowanie_słów(key)
