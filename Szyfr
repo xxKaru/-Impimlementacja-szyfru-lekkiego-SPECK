@@ -1,3 +1,5 @@
+import random
+
 def obrocwprawo (x, n):
     obrocona = (x >> n) | ((x  << (64 - n)) & 0xFFFFFFFFFFFFFFFF )
     return obrocona
@@ -23,38 +25,54 @@ def runda_klucza (k0, k1, i):
     k1 ^=k0
     return k0, k1
 
-def szyfrowanie (x, y, k0, k1):
-
-    for i in range(32):
-        x, y = runda_speck(x, y, k1)
-        k0, k1 = runda_klucza(k0, k1, i)
+def szyfrowanie (plaintext, k0, k1):
+    assert len(plaintext) % 32 == 0
+    szyfr = []
+    for i in range(0,len(plaintext),32):
+        x,y = siatkowanie_słów(plaintext[i:i+32])
+        for o in range(32):
+            x, y = runda_speck(x, y, k1)
+            k0, k1 = runda_klucza(k0, k1, o)
+        szyfr.append((x,y))
         
-    return x, y
+        
+    return szyfr
 
 def siatkowanie_słów(text):
-    assert len(text) == 32
     słowo1 = int(text[:16], 16)
     słowo2 = int(text[16:], 16)
     return słowo1, słowo2
 
+
 def padding(plaintext):
-    while len(plaintext) != 32 :
-        plaintext += '0'
-    return plaintext
+    alfabet = "0123456789ABCDEF"
+    padding_dlugosc = 32 - (len(plaintext) % 32)
+    plaintext = list(plaintext)
+    for _ in range(padding_dlugosc):
+        plaintext.append(random.choice(alfabet))
+    padding_block = "".join(random.choice(alfabet)
+    for _ in range(30))
+    plaintext.append(padding_block)
+    plaintext.append(f"{padding_dlugosc:02X}")
+    return "".join(plaintext)
 
 def ascii_to_hex(text_ascii):
     plaintext = text_ascii.encode('utf-8').hex()
     return padding(plaintext)
 
 
-plaintext = "cokolwiek"  
+plaintext = "cokolwieka"  
 key = "0f0e0d0c0b0a09080706050403020100"
 
 plaintext = ascii_to_hex(plaintext)
+
+print (plaintext)
 
 x, y = siatkowanie_słów(plaintext)
 k0, k1= siatkowanie_słów(key)
 
 
-szyfr = szyfrowanie(x, y, k0, k1)
-print(f"szyfr: {szyfr[0]:016x}, {szyfr[1]:016x}")
+szyfr = szyfrowanie(plaintext, k0, k1)
+print("Szyfr")
+for i, słowo in enumerate(szyfr):
+    print(f"{słowo[0]:016x}, {słowo[1]:016x}") 
