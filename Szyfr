@@ -25,11 +25,15 @@ def runda_klucza(k0, k1, i):
 def szyfrowanie(plaintext, k0, k1):
     assert len(plaintext) % 32 == 0
     szyfr = []
+    klucze_rund = [(k0, k1)]
+    for i in range(32):
+        k0, k1 = runda_klucza(k0, k1, i)
+        klucze_rund.append((k0, k1))
+    
     for i in range(0, len(plaintext), 32):
         x, y = siatkowanie_slow(plaintext[i:i+32])
         for o in range(32):
-            x, y = runda_speck(x, y, k1)
-            k0, k1 = runda_klucza(k0, k1, o)
+            x, y = runda_speck(x, y, klucze_rund[o][1])
         szyfr.append((x, y))
     return szyfr
 
@@ -70,7 +74,7 @@ def deszyfrowanie(ciphertext, k0, k1):
         odszyfrowane.append(f"{x:016x}{y:016x}")
     return odszyfrowane
 
-plaintext = "cokolwieka"
+plaintext = "cokolwieka "
 key = "0f0e0d0c0b0a09080706050403020100"
 
 plaintext = ascii_to_hex(plaintext)
