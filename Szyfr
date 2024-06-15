@@ -52,9 +52,18 @@ def padding(plaintext):
     plaintext += f"{padding_dlugosc:02X}"
     return plaintext
 
+def depadding(padded_tekst):
+        długość_paddingu = int(padded_tekst[-2:], 16)
+        depadded = padded_tekst[:-długość_paddingu-32]
+        return depadded
+
 def ascii_to_hex(text_ascii):
     plaintext = text_ascii.encode('utf-8').hex()
     return padding(plaintext)
+
+def hex_to_ascii(hex_text):
+    odszyfrowane = bytes.fromhex(hex_text)
+    return odszyfrowane.decode('utf-8')
 
 def deszyfrowanie(ciphertext, k0, k1):
     odszyfrowane = []
@@ -72,14 +81,14 @@ def deszyfrowanie(ciphertext, k0, k1):
             x = (x - y) & 0xFFFFFFFFFFFFFFFF
             x = obrocwlewo(x, 8)
         odszyfrowane.append(f"{x:016x}{y:016x}")
-    return odszyfrowane
+    return ''.join(odszyfrowane)
 
-plaintext = "cokolwieka "
+plaintext = "cokolwiek"
 key = "0f0e0d0c0b0a09080706050403020100"
 
 plaintext = ascii_to_hex(plaintext)
 
-print("Padded plaintext:")
+print("Padded plaintext")
 print(plaintext)
 
 x, y = siatkowanie_slow(plaintext)
@@ -89,8 +98,10 @@ szyfr = szyfrowanie(plaintext, k0, k1)
 print("Szyfr:")
 for i, slowo in enumerate(szyfr):
     print(f"{slowo[0]:016x}, {slowo[1]:016x}")
-
+    
 odszyfrowane = deszyfrowanie(szyfr, k0, k1)
+odszyfrowane = depadding(odszyfrowane)
+odszyfrowane = hex_to_ascii(odszyfrowane)
+
 print("Odszyfrowane:")
-for i, slowo in enumerate(odszyfrowane):
-    print(slowo)
+print(odszyfrowane)
