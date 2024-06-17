@@ -118,7 +118,3 @@ if tryb == 'zaszyfruj':
 else:
     plaintext = speck_cipher(tekst, klucz, tryb)
     print("Przetłumaczone:", plaintext)
-odszyfrowane = hex_to_ascii(odszyfrowane)
-
-print("Odszyfrowane:")
-print(odszyfrowane)
