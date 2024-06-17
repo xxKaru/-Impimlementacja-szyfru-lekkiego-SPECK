@@ -53,17 +53,17 @@ def padding(plaintext):
     return plaintext
 
 def depadding(padded_tekst):
-        długość_paddingu = int(padded_tekst[-2:], 16)
-        depadded = padded_tekst[:-długość_paddingu-32]
-        return depadded
+    dlugosc_paddingu = int(padded_tekst[-2:], 16)
+    depadded = padded_tekst[:-dlugosc_paddingu-32]
+    return depadded
 
 def ascii_to_hex(text_ascii):
     plaintext = text_ascii.encode('utf-8').hex()
     return padding(plaintext)
 
 def hex_to_ascii(hex_text):
-    odszyfrowane = bytes.fromhex(hex_text)
-    return odszyfrowane.decode('utf-8')
+    odszyfrowane = bytes.fromhex(hex_text).decode('utf-8')
+    return odszyfrowane
 
 def deszyfrowanie(ciphertext, k0, k1):
     odszyfrowane = []
@@ -83,24 +83,41 @@ def deszyfrowanie(ciphertext, k0, k1):
         odszyfrowane.append(f"{x:016x}{y:016x}")
     return ''.join(odszyfrowane)
 
-plaintext = "cokolwiek"
-key = "0f0e0d0c0b0a09080706050403020100"
-
-plaintext = ascii_to_hex(plaintext)
-
-print("Padded plaintext")
-print(plaintext)
-
-x, y = siatkowanie_slow(plaintext)
-k0, k1 = siatkowanie_slow(key)
-
-szyfr = szyfrowanie(plaintext, k0, k1)
-print("Szyfr:")
-for i, slowo in enumerate(szyfr):
-    print(f"{slowo[0]:016x}, {slowo[1]:016x}")
+def speck_cipher(tekst, klucz, tryb):
+    k0, k1 = siatkowanie_slow(klucz)
     
-odszyfrowane = deszyfrowanie(szyfr, k0, k1)
-odszyfrowane = depadding(odszyfrowane)
+    if tryb == 'zaszyfruj':
+        tekst = ascii_to_hex(tekst)
+        print("Padded plaintext:", tekst)
+        szyfr = szyfrowanie(tekst, k0, k1)
+        print("Szyfr:")
+        for i, slowo in enumerate(szyfr):
+            print(f"{slowo[0]:016x}, {slowo[1]:016x}")
+        return szyfr
+    elif tryb == 'deszyfruj':
+        szyfr = []
+        for i in range(0, len(tekst), 32):
+            x, y = siatkowanie_slow(tekst[i:i+32])
+            szyfr.append((x, y))
+        odszyfrowane = deszyfrowanie(szyfr, k0, k1)
+        print("Zdeszyfrowane:", odszyfrowane)
+        odszyfrowane = depadding(odszyfrowane)
+        print("Depadded:", odszyfrowane)
+        odszyfrowane = hex_to_ascii(odszyfrowane)
+        return odszyfrowane
+    else:
+        raise ValueError("Użyj zaszyfruj lub deszyfruj")
+
+
+tryb = 'zaszyfruj' 
+tekst = "cokolwiek" if tryb == 'zaszyfruj' else "f3768ef2b8b9f384b95bf9571cc7206e8c159e1e07693e775133978f8ad4162c"
+klucz = "0f0e0d0c0b0a09080706050403020100"
+
+if tryb == 'zaszyfruj':
+    szyfr = speck_cipher(tekst, klucz, tryb)
+else:
+    plaintext = speck_cipher(tekst, klucz, tryb)
+    print("Przetłumaczone:", plaintext)
 odszyfrowane = hex_to_ascii(odszyfrowane)
 
 print("Odszyfrowane:")
